@@ -1,0 +1,32 @@
+Import( 'env' )
+
+import sys
+import collections
+
+env.Java( source = 'java', target = 'java', JAVAVERSION = '1.7' )
+jar = env.Jar(  source = 'java', target = 'JPipe.jar' )
+env.Install( env[ 'INSTALL_DIR' ], jar )
+
+
+
+root_dir = Dir( '.' ).srcnode()
+dirs = collections.deque()
+dirs.append( Dir( 'native/' + sys.platform ).srcnode() )
+
+
+srcs = []
+
+while len( dirs ) != 0:
+    dir = dirs.popleft()
+    for child in dir.glob( '*' ):
+        if child.isdir():
+            dirs.append( child )
+    
+        
+    
+    for src in dir.glob( '*.cpp' ):
+        srcs.append( File( root_dir.rel_path( src ) ) )
+
+
+library = env.SharedLibrary( 'JPipe', srcs )
+env.Install( Dir( 'natives', env[ 'INSTALL_DIR' ] ), library )
